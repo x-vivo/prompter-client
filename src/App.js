@@ -31,8 +31,6 @@ class App extends Component {
             default:
                 console.error('UNKNOWN MIDI COMMAND', payload);
           }
-          state.clients = payload;
-          this.setState(state);
         break;
       default:
         console.error('UNKNOWN SOCKET DATA TYPE', data);
