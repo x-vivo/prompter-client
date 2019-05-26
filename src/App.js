@@ -85,10 +85,7 @@ class App extends Component {
           {this.state.clients.map((client, id) => (<div key={id}>{client}</div>))}
         </div>
 
-	{ false && <Websocket url={`ws://${window.location.hostname}:5050/`}
-          onMessage={this.handleData.bind(this)}
-          ref={socket => { this.webSocket = socket; }}/>}
-	<Websocket url={`ws://192.168.4.1:5050/`}
+	<Websocket url={`ws://${window.location.hostname}:5050/`}
           onMessage={this.handleData.bind(this)}
           ref={socket => { this.webSocket = socket; }}/>
       </div>
