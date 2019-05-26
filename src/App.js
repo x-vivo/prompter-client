@@ -6,7 +6,8 @@ class App extends Component {
     super();
     this.state = {
       clients: [],
-      connections:{}
+      connections:{},
+      clap: ''
     };
   }
   handleData(data) {
@@ -19,6 +20,18 @@ class App extends Component {
         break;
       case "LIST_CONNECTIONS_RESPONSE":
           state.connections = payload;
+          this.setState(state);
+        break;
+      case "MIDI":
+          switch(payload.type){
+            case "TIMING_CLOCK":
+              state.clap = payload.payload.clap;
+              this.setState(state);
+              break;
+            default:
+                console.error('UNKNOWN MIDI COMMAND', payload);
+          }
+          state.clients = payload;
           this.setState(state);
         break;
       default:
@@ -41,6 +54,7 @@ class App extends Component {
 		}))}>connect</button></div>))}
         </div>
         <div>
+          <div><h1>{this.state.clap}</h1></div>
           <div>Client List</div>
           {this.state.clients.map((client, id) => (<div key={id}>{client}</div>))}
         </div>
