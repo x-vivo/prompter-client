@@ -4,15 +4,25 @@ import Websocket from 'react-websocket';
 class App extends Component {
   constructor(){
     super();
+    this.fraction = 0;
     this.state = {
       clients: [],
       connections:{},
-      clap: ''
+      clap: '',
+      bar: '',
+      midiConnectionId: undefined
     };
   }
   handleData(data) {
-    const {type, payload} = JSON.parse(data);
     const state = Object.assign({}, this.state);
+    if(data.startsWith('F')){
+      this.fraction = Math.floor((parseInt(data.replace('F', '')) -1) / 4) + 1;
+      state.fraction = this.fraction;
+      this.setState(state);
+      return;
+    }
+
+    const {type, payload} = JSON.parse(data);
     switch (type) {
       case "CLIENT_LIST":
           state.clients = payload;
@@ -20,6 +30,17 @@ class App extends Component {
         break;
       case "LIST_CONNECTIONS_RESPONSE":
           state.connections = payload;
+          this.setState(state);
+        break;
+      case "MIDI_CONNECTED":
+          state.midiConnectionId = payload.connectionId;
+          this.setState(state);
+        break;
+      case "MIDI_DISCONNECTED":
+          if(state.midiConnectionId !== payload.connectionId){
+            return;
+          }
+          state.midiConnectionId = undefined;
           this.setState(state);
         break;
       case "MIDI":
@@ -46,19 +67,28 @@ class App extends Component {
         <div>
           <button onClick={() => this.sendMessage(JSON.stringify({
             type: "LIST_CONNECTIONS_REQUEST"
-          }))}>List Devices</button>
-          {Object.entries(this.state.connections).map(entry => (<div key={entry[0]}>{entry[1]}<button onClick={() => this.sendMessage(JSON.stringify({
-			type: "CONNECT",
-			payload: entry[0]
-		}))}>connect</button></div>))}
+          }))}>List Connections</button>
+          {Object.entries(this.state.connections).map(entry => (<div key={entry[0]}>{entry[1]}
+            {this.state.midiConnectionId !== entry[0] && (<button onClick={() => this.sendMessage(JSON.stringify({
+              type: "CONNECT",
+              payload: entry[0]
+            }))}>connect</button>)}
+            {this.state.midiConnectionId === entry[0] && (<button onClick={() => this.sendMessage(JSON.stringify({
+              type: "DISCONNECT",
+              payload: entry[0]
+            }))}>disconnect</button>)}
+          </div>))}
         </div>
         <div>
-          <div><h1>{`${this.state.bar} ${this.state.clap}`}</h1></div>
+          <div><h1>{`${this.state.bar} ${this.fraction}`}</h1></div>
           <div>Client List</div>
           {this.state.clients.map((client, id) => (<div key={id}>{client}</div>))}
         </div>
 
-	<Websocket url={`ws://${window.location.hostname}:5050/`}
+	{ false && <Websocket url={`ws://${window.location.hostname}:5050/`}
+          onMessage={this.handleData.bind(this)}
+          ref={socket => { this.webSocket = socket; }}/>}
+	<Websocket url={`ws://192.168.4.1:5050/`}
           onMessage={this.handleData.bind(this)}
           ref={socket => { this.webSocket = socket; }}/>
       </div>
