@@ -26,6 +26,7 @@ class App extends Component {
           switch(payload.type){
             case "TIMING_CLOCK":
               state.clap = payload.payload.clap;
+              state.bar = payload.payload.bar;
               this.setState(state);
               break;
             default:
@@ -52,7 +53,7 @@ class App extends Component {
 		}))}>connect</button></div>))}
         </div>
         <div>
-          <div><h1>{this.state.clap}</h1></div>
+          <div><h1>{`${this.state.bar} ${this.state.clap}`}</h1></div>
           <div>Client List</div>
           {this.state.clients.map((client, id) => (<div key={id}>{client}</div>))}
         </div>
