@@ -15,8 +15,8 @@ class App extends Component {
   }
   handleData(data) {
     const state = Object.assign({}, this.state);
-    if(data.startsWith('F')){
-      this.fraction = Math.floor((parseInt(data.replace('F', '')) -1) / 4) + 1;
+    if(data.length === 1){
+      this.fraction = Math.floor(parseInt(data.charCodeAt(0) -1) / 4) + 1;
       state.fraction = this.fraction;
       this.setState(state);
       return;
