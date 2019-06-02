@@ -1,10 +1,12 @@
 import React, { Component } from 'react';
 import Websocket from 'react-websocket';
+import Click from './components/Click';
+import Song from './components/Song';
 
 class App extends Component {
   constructor(){
     super();
-    this.fraction = 0;
+    this.beat = 0;
     this.state = {
       clients: [],
       connections:{},
@@ -16,8 +18,8 @@ class App extends Component {
   handleData(data) {
     const state = Object.assign({}, this.state);
     if(data.length === 1){
-      this.fraction = Math.floor(parseInt(data.charCodeAt(0) -1) / 4) + 1;
-      state.fraction = this.fraction;
+      this.beat = Math.floor(parseInt(data.charCodeAt(0) -1) / 4) + 1;
+      state.beat = this.beat;
       this.setState(state);
       return;
     }
@@ -64,6 +66,10 @@ class App extends Component {
   render(){
     return (
       <div className="App">
+				<h1>I Like To Suffer : {`${this.state.bar}.${this.beat}`}</h1>
+        <Click beats={4} beat={this.state.beat}/>
+        <Song id="I Like To Suffer" bar={this.state.bar/* % 229*/}/>
+        <div><h1></h1></div>
         <div>
           <button onClick={() => this.sendMessage(JSON.stringify({
             type: "LIST_CONNECTIONS_REQUEST"
@@ -80,7 +86,6 @@ class App extends Component {
           </div>))}
         </div>
         <div>
-          <div><h1>{`${this.state.bar} ${this.fraction}`}</h1></div>
           <div>Client List</div>
           {this.state.clients.map((client, id) => (<div key={id}>{client}</div>))}
         </div>
