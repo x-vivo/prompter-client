@@ -1,23 +1,32 @@
 import React, { Component } from 'react';
 import Websocket from 'react-websocket';
+import Click from './components/Click';
+import Song from './components/Song';
+import Fullscreen from "react-full-screen";
+import styled from '@emotion/styled';
+
+const Wrapper = styled.div`
+	background-color:#ffffff;
+`;
 
 class App extends Component {
   constructor(){
     super();
-    this.fraction = 0;
+    this.beat = 0;
     this.state = {
       clients: [],
       connections:{},
       clap: '',
       bar: '',
-      midiConnectionId: undefined
+      midiConnectionId: null,
+      isFullScreen: false,
     };
   }
   handleData(data) {
     const state = Object.assign({}, this.state);
     if(data.length === 1){
-      this.fraction = Math.floor(parseInt(data.charCodeAt(0) -1) / 4) + 1;
-      state.fraction = this.fraction;
+      this.beat = Math.floor(parseInt(data.charCodeAt(0) -1) / 4) + 1;
+      state.beat = this.beat;
       this.setState(state);
       return;
     }
@@ -61,34 +70,48 @@ class App extends Component {
   sendMessage(message){
     this.webSocket.sendMessage(message);
   }
+  toggleFullScreen(){
+    console.log('toggle full screen');
+    const state = Object.assign({}, this.state);
+    state.isFullScreen = !state.isFullScreen;
+    this.setState(state);
+  }
   render(){
     return (
-      <div className="App">
-        <div>
-          <button onClick={() => this.sendMessage(JSON.stringify({
-            type: "LIST_CONNECTIONS_REQUEST"
-          }))}>List Connections</button>
-          {Object.entries(this.state.connections).map(entry => (<div key={entry[0]}>{entry[1]}
-            {this.state.midiConnectionId !== entry[0] && (<button onClick={() => this.sendMessage(JSON.stringify({
-              type: "CONNECT",
-              payload: entry[0]
-            }))}>connect</button>)}
-            {this.state.midiConnectionId === entry[0] && (<button onClick={() => this.sendMessage(JSON.stringify({
-              type: "DISCONNECT",
-              payload: entry[0]
-            }))}>disconnect</button>)}
-          </div>))}
-        </div>
-        <div>
-          <div><h1>{`${this.state.bar} ${this.fraction}`}</h1></div>
-          <div>Client List</div>
-          {this.state.clients.map((client, id) => (<div key={id}>{client}</div>))}
-        </div>
+      <Fullscreen
+        enabled={this.state.isFullScreen}
+        onChange={isFullScreen => this.setState({isFullScreen})}
+      >
+        <Wrapper>
+          <h1 onClick={() => this.toggleFullScreen()}>I Like To Suffer : {`${this.state.bar}.${this.beat}`}</h1>
+          <Click beats={4} beat={this.state.beat}/>
+          <Song id="I Like To Suffer" bar={this.state.bar/* % 229*/}/>
+          <div><h1></h1></div>
+          <div>
+            <button onClick={() => this.sendMessage(JSON.stringify({
+              type: "LIST_CONNECTIONS_REQUEST"
+            }))}>List Connections</button>
+            {Object.entries(this.state.connections).map(entry => (<div key={entry[0]}>{entry[1]}
+              {this.state.midiConnectionId !== entry[0] && (<button onClick={() => this.sendMessage(JSON.stringify({
+                type: "CONNECT",
+                payload: entry[0]
+              }))}>connect</button>)}
+              {this.state.midiConnectionId === entry[0] && (<button onClick={() => this.sendMessage(JSON.stringify({
+                type: "DISCONNECT",
+                payload: entry[0]
+              }))}>disconnect</button>)}
+            </div>))}
+          </div>
+          <div>
+            <div>Client List</div>
+            {this.state.clients.map((client, id) => (<div key={id}>{client}</div>))}
+          </div>
 
-	<Websocket url={`ws://${window.location.hostname}:5050/`}
-          onMessage={this.handleData.bind(this)}
-          ref={socket => { this.webSocket = socket; }}/>
-      </div>
+          <Websocket url={`ws://${window.location.hostname}:5050/`}
+            onMessage={this.handleData.bind(this)}
+            ref={socket => { this.webSocket = socket; }}/>
+        </Wrapper>
+      </Fullscreen>
     );
   }
 }
