@@ -83,12 +83,12 @@ export default class Song extends Component {
 							if(offsets.current === part.offset){
 								return (
 									<CurrentPart key={`${index}-${part.name}`} style={part.style}>
-										<div>
-										{part.name}{false && (<>: [{offsets.current}...{this.props.bar}...{offsets.next}]</>)}
-										</div>
 										<Progress>
 											<div style={{backgroundColor:'#000000', height: '100%', width:`${100 * (this.props.bar - offsets.current + 1)/(offsets.next - offsets.current)}%`, opacity:0.5}}></div>
 										</Progress>
+										<div>
+										{part.name}{false && (<>: [{offsets.current}...{this.props.bar}...{offsets.next}]</>)}
+										</div>
 									</CurrentPart>
 								)
 							}
