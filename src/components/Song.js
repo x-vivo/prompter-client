@@ -24,6 +24,13 @@ const CurrentPart = styled(Part)`
 	border: 3px solid #000000;
 	font-weight:600;
 `;
+const Progress = styled.div`
+	margin:0;
+	padding:0;
+	height:10px;
+	align:left;
+	vertical-align:top;
+`;
 
 export default class Song extends Component {
 	constructor(props){
@@ -74,7 +81,16 @@ export default class Song extends Component {
 								return null;
 							}
 							if(offsets.current === part.offset){
-								return (<CurrentPart key={`${index}-${part.name}`} style={part.style}>{part.name}: [{offsets.current}...{this.props.bar}...{offsets.next}]</CurrentPart>)
+								return (
+									<CurrentPart key={`${index}-${part.name}`} style={part.style}>
+										<div>
+										{part.name}{false && (<>: [{offsets.current}...{this.props.bar}...{offsets.next}]</>)}
+										</div>
+										<Progress>
+											<div style={{backgroundColor:'#000000', height: '100%', width:`${100 * (this.props.bar - offsets.current + 1)/(offsets.next - offsets.current)}%`, opacity:0.5}}></div>
+										</Progress>
+									</CurrentPart>
+								)
 							}
 							return (<Part key={`${index}-${part.name}`} style={part.style}>{part.name}</Part>)
 						})
