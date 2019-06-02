@@ -34,7 +34,18 @@ export default class Song extends Component {
 			return (<div>No song selected!</div>);
 		}
 		const { arrangement, remarks } = setup.songs[this.props.id];
-		const offsets = arrangement.reduce((accu, part) => {
+		const arr = arrangement.reduce((accu, part) => {
+			if(
+				(!accu.length) 
+				|| (this.props.bar >= part.offset && accu[0].offset < part.offset)
+			){
+				return [part];
+			} else if(accu.length){
+				accu.push(part);
+			}
+			return accu;
+		}, []);
+		const offsets = arr.reduce((accu, part) => {
 			if(this.props.bar >= part.offset && accu.current < part.offset){
 				accu.current = part.offset;
 			}
@@ -58,7 +69,7 @@ export default class Song extends Component {
 			<>
 				<Wrapper>
 					{
-						arrangement.map((part, index) => {
+						arr.map((part, index) => {
 							if(!part.name){
 								return null;
 							}
